@@ -9,31 +9,35 @@ jobs:
   security_hardening:
     name: Check security hardening
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
     - name: Clone the repository
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
     - name: Ensure SHA pinned actions
-      uses: zgosalvez/github-actions-ensure-sha-pinned-actions@9e9574ef04ea69da568d6249bd69539ccc704e74
+      uses: zgosalvez/github-actions-ensure-sha-pinned-actions@3db98c0363e2fa5df3e1c4c471777a7c10b24cc9
 
   build_test:
     name: Build & Test
     needs: security_hardening
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
     - name: Clone the repository
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       with:
         ref: ${{ github.head_ref }} # https://github.com/stefanzweifel/git-auto-commit-action#checkout-the-correct-branch
     - name: Get runs.using version
       id: get-runs-using-version
       uses: ./
     - name: Set up Node
-      uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
       with:
         node-version: v${{ steps.get-runs-using-version.outputs.version }}
     - name: Cache Node Packages
       id: node-cache
-      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
       with:
         path: ~/.npm
         key: node-cache-${{ steps.get-runs-using-version.outputs.prop }}-${{ hashFiles('**/package-lock.json') }}
@@ -46,6 +50,6 @@ jobs:
       run: npm run lint
     - name: Prepare
       run: npm run prepare
-    - uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0
+    - uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d
       with:
         commit_message: Apply `npm run prepare` changes
